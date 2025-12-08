@@ -3,8 +3,8 @@
 ## Professional Demo Interface for BlackRock Tech Ops Interview
 
 ### Design Philosophy
-- **Minimal**: Clean, futuristic design with no clutter
-- **Professional**: Dark theme with gradient accents
+- **Minimal**: Pure black background with clean typography
+- **Professional**: Minimalist design with centered layout
 - **Performance-focused**: Real-time metrics displayed prominently
 - **Production-ready**: Boss-level execution
 
@@ -12,13 +12,15 @@
 
 ```bash
 # Install Streamlit (if not already installed)
-pip install streamlit>=1.40.0
+pip install streamlit
 
 # Run the app
 streamlit run streamlit_app.py
 ```
 
 The app will open at `http://localhost:8501`
+
+**Note:** The app is compatible with older versions of Streamlit. If you encounter compatibility issues, ensure you have at least Streamlit 0.89.0 installed.
 
 ### Features
 
@@ -29,11 +31,12 @@ The app will open at `http://localhost:8501`
 - Latency tracking (milliseconds)
 
 **UI Elements:**
-- Professional dark gradient background
+- Pure black minimal background (#000000)
+- Centered classify button with tight padding
 - Color-coded results (green/red/orange/purple/gray)
-- One-click example queries
 - Performance metrics dashboard
 - Category legend with descriptions
+- No UMAP visualization (removed for cleaner interface)
 
 **Performance Display:**
 - Accuracy: 97%
@@ -51,11 +54,12 @@ The app will open at `http://localhost:8501`
 
 ### Technical Stack
 
-- **Frontend**: Streamlit with custom CSS
+- **Frontend**: Streamlit with custom CSS (pure black minimal theme)
 - **Backend**: Random Forest classifier (scikit-learn)
 - **Embeddings**: Sentence Transformers (768-dim)
 - **Model**: Cached with `@st.cache_resource`
-- **Theme**: Custom dark gradient theme
+- **Theme**: Pure black background with centered elements
+- **Styling**: Custom CSS with flexbox for centered button layout
 
 ### Deployment Ready
 
@@ -88,19 +92,20 @@ Run Phase 4 first if these don't exist:
 python scripts/run_phase4.py
 ```
 
-### Customization
+### Recent Updates
 
-**To modify the app name:**
-Edit line 11 in `streamlit_app.py`:
-```python
-page_title="Your Title Here"
-```
+**v1.1 - UI Fixes (2025-12-08)**
+- Fixed `use_container_width` compatibility issue with older Streamlit versions
+- Removed UMAP visualization section for cleaner minimal interface
+- Fixed button text visibility (black text on white button background)
+- Centered classify button with reduced horizontal padding
+- Updated footer with correct name
 
-**To change colors:**
-Edit the CSS in the `st.markdown()` block (lines 20-300)
-
-**To adjust performance metrics:**
-Modify the metrics section (lines 500+)
+**Customization:**
+- **App name**: Edit `page_title` in `st.set_page_config()` (line 15)
+- **Colors**: Modify CSS in `st.markdown()` block (lines 22-220)
+- **Button styling**: Adjust `.stButton button` CSS (lines 80-100)
+- **Metrics**: Update metrics section (lines 384-407)
 
 ---
 

@@ -9,6 +9,7 @@ FinGuard is a production-grade prompt safety classifier designed to detect and b
 - 🎨 Embedding-based classification with visual cluster analysis
 - 📊 Comprehensive benchmarking suite
 - 🔧 Modular, extensible architecture
+- 🖥️ Professional Streamlit web interface with minimal design
 
 ## Getting Started
 
@@ -57,8 +58,14 @@ python scripts/run_phase5.py  # Demo & benchmark
 
 ### Interactive Demo
 ```bash
+# CLI Demo
 python src/demo/cli_demo.py
+
+# Streamlit Web Interface
+streamlit run streamlit_app.py
 ```
+
+See `STREAMLIT_README.md` for detailed web interface documentation.
 
 ### Run Tests
 ```bash
