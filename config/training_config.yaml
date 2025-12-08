@@ -1,0 +1,74 @@
+# Classifier Training Configuration
+
+training:
+  test_size: 0.2
+  validation_size: 0.1
+  random_seed: 42
+  stratify: true
+
+classifiers:
+  random_forest:
+    n_estimators: 100
+    max_depth: 20
+    min_samples_split: 5
+    min_samples_leaf: 2
+    max_features: "sqrt"
+    class_weight: "balanced"
+    n_jobs: -1
+    random_state: 42
+
+  logistic_regression:
+    penalty: "l2"
+    C: 1.0
+    solver: "lbfgs"
+    max_iter: 1000
+    class_weight: "balanced"
+    random_state: 42
+
+  xgboost:
+    n_estimators: 100
+    max_depth: 6
+    learning_rate: 0.1
+    objective: "multi:softmax"
+    num_class: 5
+    eval_metric: "mlogloss"
+    random_state: 42
+
+hyperparameter_tuning:
+  enabled: false
+  method: "grid_search"  # or "random_search"
+  cv_folds: 5
+  n_iter: 50  # for random search
+
+  param_grid:
+    n_estimators: [50, 100, 200]
+    max_depth: [10, 20, 30, null]
+    min_samples_split: [2, 5, 10]
+    min_samples_leaf: [1, 2, 4]
+
+evaluation:
+  metrics:
+    - "accuracy"
+    - "precision"
+    - "recall"
+    - "f1_score"
+    - "confusion_matrix"
+    - "classification_report"
+
+  cross_validation:
+    enabled: true
+    cv_folds: 5
+
+  class_specific_metrics: true
+
+  output:
+    model_path: "models/rf_classifier_v1.pkl"
+    metrics_path: "outputs/metrics/classification_report.json"
+    confusion_matrix_path: "outputs/metrics/confusion_matrix.png"
+    feature_importance_path: "outputs/metrics/feature_importance.png"
+
+thresholds:
+  min_accuracy: 0.90
+  min_f1_macro: 0.90
+  max_false_positive_rate: 0.05
+  max_false_negative_rate: 0.03

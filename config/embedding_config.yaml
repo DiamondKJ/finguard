@@ -1,0 +1,40 @@
+# Embedding Generation Configuration
+
+embeddings:
+  cache_enabled: true
+  cache_dir: "data/embeddings"
+  batch_size: 100
+
+models:
+  openai:
+    name: "text-embedding-3-small"
+    dimensions: 1536
+    api_version: "v1"
+    max_retries: 3
+    timeout: 30
+
+  sentence_transformer:
+    name: "all-mpnet-base-v2"
+    dimensions: 768
+    device: "cpu"  # or "cuda" if GPU available
+    normalize: true
+
+  nv_embed:  # Optional, for future implementation
+    name: "nvidia/NV-Embed-v2"
+    dimensions: 4096
+    device: "cuda"
+    enabled: false
+
+comparison:
+  metrics:
+    - "cosine_similarity"
+    - "euclidean_distance"
+    - "cluster_separation"
+  visualize: true
+  output_path: "outputs/embeddings/comparison_report.json"
+
+preprocessing:
+  lowercase: false
+  remove_punctuation: false
+  max_length: 512
+  truncation: true

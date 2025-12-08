@@ -1,0 +1,17 @@
+{
+  "version": "1.0",
+  "mcpServers": {},
+  "globalShortcuts": {
+    "chat.newSession": "cmd+shift+l",
+    "chat.addContext": "cmd+shift+a"
+  },
+  "hooks": {
+    "userPromptSubmit": null,
+    "assistantResponse": null
+  },
+  "context": {
+    "alwaysInclude": [
+      "CLAUDE_INSTRUCTIONS.md"
+    ]
+  }
+}
