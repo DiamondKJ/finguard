@@ -1,0 +1,122 @@
+{
+  "accuracy": 0.97,
+  "precision": 0.9722943722943722,
+  "recall": 0.97,
+  "f1_score": 0.9699436207780238,
+  "confusion_matrix": [
+    [
+      19,
+      1,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      20,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      1,
+      18,
+      1,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      20,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      20
+    ]
+  ],
+  "classification_report": {
+    "SAFE": {
+      "precision": 1.0,
+      "recall": 0.95,
+      "f1-score": 0.9743589743589743,
+      "support": 20.0
+    },
+    "INVESTMENT_ADVICE": {
+      "precision": 0.9090909090909091,
+      "recall": 1.0,
+      "f1-score": 0.9523809523809523,
+      "support": 20.0
+    },
+    "INDIRECT_ADVICE": {
+      "precision": 1.0,
+      "recall": 0.9,
+      "f1-score": 0.9473684210526315,
+      "support": 20.0
+    },
+    "SYSTEM_PROBE": {
+      "precision": 0.9523809523809523,
+      "recall": 1.0,
+      "f1-score": 0.975609756097561,
+      "support": 20.0
+    },
+    "UNIT_AMBIGUITY": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 20.0
+    },
+    "accuracy": 0.97,
+    "macro avg": {
+      "precision": 0.9722943722943723,
+      "recall": 0.97,
+      "f1-score": 0.9699436207780238,
+      "support": 100.0
+    },
+    "weighted avg": {
+      "precision": 0.9722943722943722,
+      "recall": 0.97,
+      "f1-score": 0.9699436207780238,
+      "support": 100.0
+    }
+  },
+  "per_class_metrics": {
+    "SAFE": {
+      "precision": 1.0,
+      "recall": 0.95,
+      "f1_score": 0.9743589743589743,
+      "support": 20
+    },
+    "INVESTMENT_ADVICE": {
+      "precision": 0.9090909090909091,
+      "recall": 1.0,
+      "f1_score": 0.9523809523809523,
+      "support": 20
+    },
+    "INDIRECT_ADVICE": {
+      "precision": 1.0,
+      "recall": 0.9,
+      "f1_score": 0.9473684210526315,
+      "support": 20
+    },
+    "SYSTEM_PROBE": {
+      "precision": 0.9523809523809523,
+      "recall": 1.0,
+      "f1_score": 0.975609756097561,
+      "support": 20
+    },
+    "UNIT_AMBIGUITY": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1_score": 1.0,
+      "support": 20
+    }
+  },
+  "false_positive_rate": 0.0075,
+  "false_negative_rate": 0.03
+}
