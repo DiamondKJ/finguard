@@ -13,7 +13,7 @@ from src.embeddings.sentence_transformer_embedder import SentenceTransformerEmbe
 # Page config
 st.set_page_config(
     page_title="FinGuard",
-    page_icon="🛡️",
+    page_icon="assets/shield_icon.svg",
     layout="wide",
     initial_sidebar_state="collapsed",
 )
@@ -169,13 +169,17 @@ st.markdown(
         display: grid;
         grid-template-columns: repeat(4, 1fr);
         gap: 2rem;
-        margin: 3rem 0;
-        padding: 2rem 0;
+        margin: 3rem 0 2rem 0;
+        padding: 2rem 0 0 0;
         border-top: 1px solid #222222;
     }
 
     .metric-item {
         text-align: center;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
     }
 
     .metric-value {
@@ -228,6 +232,100 @@ st.markdown(
         font-size: 0.75rem;
         letter-spacing: 0.15em;
     }
+
+    /* Feedback Section */
+    .feedback-section {
+        text-align: center;
+        padding: 1.5rem 0;
+        margin-top: 0.5rem;
+    }
+
+    .confidence-message {
+        font-size: 0.8rem;
+        color: #666666;
+        letter-spacing: 0.1em;
+        margin-bottom: 1rem;
+        text-align: center;
+    }
+
+    .confidence-message.uncertain {
+        color: #ff8800;
+    }
+
+    .feedback-prompt {
+        font-size: 0.75rem;
+        color: #555555;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        margin-bottom: 1rem;
+        text-align: center;
+    }
+
+    .feedback-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+    }
+
+    .feedback-btn {
+        background: transparent;
+        border: 1px solid #333333;
+        color: #666666;
+        padding: 0.6rem 1.5rem;
+        font-size: 0.75rem;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .feedback-btn:hover {
+        border-color: #ffffff;
+        color: #ffffff;
+    }
+
+    .feedback-btn.correct:hover {
+        border-color: #00ff00;
+        color: #00ff00;
+    }
+
+    .feedback-btn.wrong:hover {
+        border-color: #ff4444;
+        color: #ff4444;
+    }
+
+    .feedback-thanks {
+        font-size: 0.75rem;
+        color: #444444;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        padding: 1rem 0;
+        text-align: center;
+    }
+
+    /* Secondary buttons (CORRECT/WRONG) */
+    .stButton button[kind="secondary"] {
+        background-color: transparent !important;
+        border: 1px solid #333333 !important;
+        color: #666666 !important;
+        font-size: 0.75rem !important;
+        padding: 0.5rem 1.2rem !important;
+    }
+
+    .stButton button[kind="secondary"]:hover {
+        border-color: #ffffff !important;
+        color: #ffffff !important;
+        background-color: transparent !important;
+    }
+
+    .stButton button[kind="secondary"] p {
+        color: #666666 !important;
+    }
+
+    .stButton button[kind="secondary"]:hover p {
+        color: #ffffff !important;
+    }
+
 </style>
 """,
     unsafe_allow_html=True,
@@ -265,14 +363,55 @@ def get_category_class(category):
         return "category-flagged"
 
 
-def get_action(category):
-    """Get action text."""
+def get_action(category, confidence):
+    """Get action text based on category and confidence."""
     if category == "SAFE":
         return "ALLOWED"
     elif category in ["INVESTMENT_ADVICE", "INDIRECT_ADVICE", "SYSTEM_PROBE"]:
+        if confidence < 0.7:
+            return "REVIEW"
         return "BLOCKED"
     else:
         return "FLAGGED"
+
+
+def get_confidence_message(confidence, category):
+    """Get confidence-aware message for user."""
+    if confidence >= 0.9:
+        return None  # High confidence, no message needed
+    elif confidence >= 0.7:
+        return "Classification confidence is moderate"
+    else:
+        if category == "SAFE":
+            return "Low confidence - please verify this classification"
+        else:
+            return "Uncertain classification - flagged for review"
+
+
+def log_feedback(query, category, confidence, feedback, timestamp):
+    """Log user feedback to file for later review."""
+    feedback_file = Path("outputs/feedback/user_feedback.json")
+    feedback_file.parent.mkdir(parents=True, exist_ok=True)
+
+    entry = {
+        "timestamp": timestamp,
+        "query": query,
+        "predicted_category": category,
+        "confidence": confidence,
+        "feedback": feedback  # "correct" or "wrong"
+    }
+
+    # Load existing feedback
+    if feedback_file.exists():
+        with open(feedback_file, "r") as f:
+            data = json.load(f)
+    else:
+        data = []
+
+    data.append(entry)
+
+    with open(feedback_file, "w") as f:
+        json.dump(data, f, indent=2)
 
 
 def main():
@@ -300,13 +439,19 @@ def main():
     # Input
     query = st.text_area(
         "",
-        placeholder="Enter query...",
+        placeholder="Ask Aladdin something...",
         height=120,
         label_visibility="collapsed",
     )
 
     # Classify button
     classify_btn = st.button("CLASSIFY")
+
+    # Initialize session state for feedback
+    if "last_result" not in st.session_state:
+        st.session_state.last_result = None
+    if "feedback_given" not in st.session_state:
+        st.session_state.feedback_given = False
 
     if classify_btn and query:
         with st.spinner(""):
@@ -316,9 +461,25 @@ def main():
             category = classifier.class_names[label]
             latency_ms = (time.time() - start_time) * 1000
 
-        # Result
+        # Store result in session state
+        st.session_state.last_result = {
+            "query": query,
+            "category": category,
+            "confidence": confidence,
+            "latency_ms": latency_ms,
+            "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
+        }
+        st.session_state.feedback_given = False
+
+    # Display result if exists
+    if st.session_state.last_result:
+        result = st.session_state.last_result
+        category = result["category"]
+        confidence = result["confidence"]
+
         category_class = get_category_class(category)
-        action = get_action(category)
+        action = get_action(category, confidence)
+        confidence_msg = get_confidence_message(confidence, category)
 
         st.markdown(
             f"""
@@ -342,14 +503,58 @@ def main():
             unsafe_allow_html=True,
         )
 
+        # Feedback buttons
+        if not st.session_state.feedback_given:
+            # Show confidence message only before feedback is given
+            if confidence_msg:
+                uncertain_class = "uncertain" if confidence < 0.7 else ""
+                st.markdown(
+                    f'<div class="confidence-message {uncertain_class}">{confidence_msg}</div>',
+                    unsafe_allow_html=True,
+                )
+            st.markdown(
+                '<div class="feedback-prompt">Was this classification correct?</div>',
+                unsafe_allow_html=True,
+            )
+
+            col1, col2, col3 = st.columns([2, 1, 2])
+            with col2:
+                fcol1, fcol2 = st.columns(2)
+                with fcol1:
+                    if st.button("CORRECT", key="btn_correct", type="secondary"):
+                        log_feedback(
+                            result["query"],
+                            result["category"],
+                            result["confidence"],
+                            "correct",
+                            result["timestamp"]
+                        )
+                        st.session_state.feedback_given = True
+                        st.rerun()
+                with fcol2:
+                    if st.button("WRONG", key="btn_wrong", type="secondary"):
+                        log_feedback(
+                            result["query"],
+                            result["category"],
+                            result["confidence"],
+                            "wrong",
+                            result["timestamp"]
+                        )
+                        st.session_state.feedback_given = True
+                        st.rerun()
+        else:
+            st.markdown(
+                '<div class="feedback-thanks">Thank you for your feedback</div>',
+                unsafe_allow_html=True,
+            )
+
     # Categories
-    st.markdown('<div class="section-title">Categories</div>', unsafe_allow_html=True)
 
     categories = [
         ("SAFE", "#00ff00", "Legitimate queries"),
-        ("INVESTMENT ADVICE", "#ff0000", "Direct recommendations"),
+        ("INVESTMENT ADVICE", "#3a3a3a", "Direct recommendations"),
         ("INDIRECT ADVICE", "#ff8800", "Roleplay attempts"),
-        ("SYSTEM PROBE", "#888888", "Prompt injection"),
+        ("SYSTEM PROBE", "#ff0000", "Prompt injection"),
         ("UNIT AMBIGUITY", "#bb00ff", "Future predictions"),
     ]
 
@@ -397,7 +602,7 @@ def main():
     st.markdown(
         """
     <div class="footer">
-        KAUSTUBH JOSHI • BLACKROCK TECH OPS
+        KAUSTUBH JOSHI • TECHNOLOGY OPERATIONS
     </div>
     """,
         unsafe_allow_html=True,
